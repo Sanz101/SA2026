@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>Sathsara Anurawa · Parking</title>
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Fonts: Inter for UI, Fraunces for the premium display accent -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #142d1c;
+      --ink-soft: #3c5b46;
+      --bg: #eef4ee;
+      --surface: #ffffff;
+      --surface-tint: #f7fbf7;
+      --line: #dbe6db;
+      --green-900: #12291a;
+      --green-800: #1a3d24;
+      --green-700: #205e2e;
+      --green-600: #2e7d32;
+      --green-500: #3f9146;
+      --green-200: #cfe6cf;
+      --green-100: #e6f2e6;
+
+      /* Tier accents — each parking tier gets its own identity */
+      --tier-guest: #5c7a68;
+      --tier-bike: #1f8a70;
+      --tier-1000: #a8632f;
+      --tier-2000: #6b7280;
+      --tier-3000: #2e7d32;
+      --tier-5000: #b8860b;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+      --shadow-1: 0 1px 2px rgba(15, 40, 20, 0.04), 0 2px 8px rgba(15, 40, 20, 0.04);
+      --shadow-2: 0 8px 24px rgba(18, 45, 25, 0.08), 0 2px 6px rgba(18, 45, 25, 0.04);
+      --shadow-3: 0 20px 50px rgba(15, 40, 20, 0.14), 0 6px 16px rgba(15, 40, 20, 0.06);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    html { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: var(--ink);
+      background-image:
+        radial-gradient(circle at 12% 8%, rgba(46, 125, 50, 0.07) 0%, transparent 55%),
+        radial-gradient(circle at 90% 85%, rgba(27, 94, 32, 0.08) 0%, transparent 50%);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-wrapper {
+      max-width: 460px;
+      width: 100%;
+      background: var(--surface);
+      border-radius: 36px;
+      box-shadow: var(--shadow-3);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      position: relative;
+      isolation: isolate;
+    }
+
+    /* ---------- HEADER ---------- */
+    .parking-header {
+      background: linear-gradient(160deg, var(--green-900) 0%, var(--green-800) 45%, var(--green-700) 100%);
+      padding: 34px 24px 26px;
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .parking-header::before {
+      content: "";
+      position: absolute;
+      inset: -40% -20% auto auto;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .parking-header::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(165, 214, 167, 0.5), transparent);
+    }
+
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-image {
+      height: 72px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.25));
+      border-radius: 14px;
+    }
+
+    .parking-header p {
+      margin: 0;
+      font-weight: 500;
+      font-size: 0.78rem;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 20px;
+      border-radius: 40px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .parking-header p i { font-size: 0.85rem; }
+
+    /* ---------- VIEWS / TRANSITIONS ---------- */
+    .container {
+      position: relative;
+      background: var(--surface-tint);
+    }
+
+    .view {
+      padding: 22px 20px 28px;
+    }
+
+    .view.hidden { display: none; }
+
+    .view-enter {
+      animation: viewIn 0.42s var(--ease-out) both;
+    }
+
+    @keyframes viewIn {
+      0% { opacity: 0; transform: translateY(14px) scale(0.99); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ---------- TICKET LIST ---------- */
+    #ticketList {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      opacity: 0.65;
+      margin: 2px 4px 14px;
+    }
+
+    /* ---------- CARDS ---------- */
+    .card {
+      --tier: var(--green-600);
+      background: var(--surface);
+      border-radius: 22px;
+      padding: 4px;
+      box-shadow: var(--shadow-1);
+      border: 1px solid var(--line);
+      transition: box-shadow 0.35s var(--ease-out), transform 0.35s var(--ease-out), border-color 0.35s var(--ease-out);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: cardIn 0.5s var(--ease-out) forwards;
+    }
+
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:active { transform: scale(0.985); }
+
+    .card-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 14px 14px 10px;
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      border-radius: 18px;
+      transition: background 0.25s var(--ease-standard);
+    }
+
+    .card-inner:hover { background: var(--green-100); }
+
+    .card-inner:active { background: var(--green-200); }
+
+    .tier-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      background: linear-gradient(150deg, var(--tier), color-mix(in srgb, var(--tier) 70%, black));
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--tier) 45%, transparent);
+    }
+
+    .card-text { flex: 1; min-width: 0; }
+
+    .card-text h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.2px;
+    }
+
+    .card-text span {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    .card-arrow {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--green-100);
+      color: var(--tier);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      transition: transform 0.3s var(--ease-spring), background 0.25s;
+    }
+
+    .card-inner:hover .card-arrow {
+      transform: translateX(3px);
+      background: var(--tier);
+      color: white;
+    }
+
+    /* ---------- BUTTONS ---------- */
+    .btn {
+      width: 100%;
+      padding: 15px 18px;
+      border: none;
+      border-radius: 50px;
+      font-size: 0.98rem;
+      font-family: inherit;
+      font-weight: 600;
+      background: var(--green-600);
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      letter-spacing: 0.1px;
+      box-shadow: 0 6px 18px rgba(46, 125, 50, 0.22);
+      transition: transform 0.22s var(--ease-spring), box-shadow 0.3s var(--ease-standard), background 0.25s var(--ease-standard);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), transparent 55%);
+      pointer-events: none;
+    }
+
+    .btn:hover {
+      background: var(--green-700);
+      box-shadow: 0 10px 26px rgba(46, 125, 50, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: scale(0.965) translateY(0);
+      box-shadow: 0 3px 10px rgba(46, 125, 50, 0.22);
+    }
+
+    .back-btn {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: none;
+      border: 1px solid var(--line);
+      width: auto;
+      padding: 9px 18px 9px 14px;
+      font-size: 0.88rem;
+      margin-bottom: 18px;
+    }
+
+    .back-btn:hover {
+      background: var(--green-100);
+      border-color: var(--green-200);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .back-btn:active { transform: scale(0.97); }
+
+    .map-btn {
+      background: var(--tier, var(--green-800));
+      margin-top: 6px;
+      box-shadow: 0 8px 22px color-mix(in srgb, var(--tier, var(--green-800)) 40%, transparent);
+    }
+
+    .map-btn:hover {
+      filter: brightness(0.92);
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--tier, var(--green-800)) 46%, transparent);
+    }
+
+    /* ---------- DETAIL HEADER ---------- */
+    .detail-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .detail-eyebrow .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--tier, var(--green-600));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--tier, var(--green-600)) 20%, transparent);
+    }
+
+    .detail-eyebrow span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      opacity: 0.65;
+    }
+
+    .detail-title {
+      font-family: 'Fraunces', 'Inter', serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+
+    /* ---------- MAP IMAGE ---------- */
+    .parking-sketch {
+      background: var(--green-100);
+      border-radius: 40px;
+      margin: 0 0 16px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 1006 / 1520;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), var(--shadow-1);
+    }
+
+    .parking-sketch img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #ffffff;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+    }
+
+    .parking-sketch img.loaded {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .parking-sketch.shimmer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 150% 0; }
+      100% { background-position: -50% 0; }
+    }
+
+    .placeholder-img {
+      width: 100%;
+      height: 100%;
+      background: var(--green-100);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--green-700);
+      font-weight: 500;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    .placeholder-img i { font-size: 2.8rem; opacity: 0.35; }
+
+    .placeholder-img span {
+      background: rgba(255, 255, 255, 0.6);
+      padding: 5px 18px;
+      border-radius: 40px;
+    }
+
+    /* ---------- CONTACTS ---------- */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--line), transparent);
+      margin: 18px 0 14px;
+    }
+
+    .section-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .section-label i {
+      color: var(--tier, var(--green-600));
+      font-size: 0.85rem;
+    }
+
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .contact-item {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 50px;
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 500;
+      transition: transform 0.25s var(--ease-spring), border-color 0.25s, background 0.25s;
+    }
+
+    .contact-item .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--green-100);
+      color: var(--tier, var(--green-600));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .contact-item:hover {
+      background: var(--green-100);
+      border-color: var(--green-200);
+      transform: translateX(4px);
+    }
+
+    .contact-item .contact-name { flex: 1; font-size: 0.92rem; }
+
+    .contact-item .contact-phone {
+      font-weight: 400;
+      opacity: 0.6;
+      font-size: 0.85rem;
+    }
+
+    /* ---------- TOAST ---------- */
+    .toast-msg {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--green-900);
+      color: white;
+      padding: 12px 26px;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: 0 16px 40px rgba(0, 15, 5, 0.3);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+      pointer-events: none;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 380px) {
+      .logo-image { height: 58px; }
+      .parking-header { padding: 26px 18px 20px; }
+      .detail-title { font-size: 1.45rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrapper">
+    <header class="parking-header">
+      <div class="logo-container">
+        <img src="logo.png" alt="Sathsara Anurawa Logo" class="logo-image">
+      </div>
+      <p><i class="fas fa-ticket-alt"></i> Choose your parking</p>
+    </header>
+
+    <div class="container" id="appContainer">
+      <!-- HOME view -->
+      <div id="homeView" class="view">
+        <div class="eyebrow">Available areas</div>
+        <div id="ticketList"></div>
+      </div>
+
+      <!-- DETAIL view -->
+      <div id="detailView" class="view hidden">
+        <button class="btn back-btn" id="backHomeBtn"><i class="fas fa-arrow-left"></i> Back</button>
+
+        <div class="detail-eyebrow">
+          <span class="dot" id="detailDot"></span>
+          <span id="detailBadge">Parking area</span>
+        </div>
+        <div class="detail-title" id="detailTitle">Parking</div>
+
+        <div class="parking-sketch shimmer" id="sketchPlaceholder">
+          <img id="mapImage" src="image.png" alt="Parking Location Map">
+        </div>
+
+        <button class="btn map-btn" id="mapBtn"><i class="fas fa-map-marked-alt"></i> Open in Google Maps</button>
+
+        <div class="divider"></div>
+        <div class="section-label"><i class="fas fa-phone-alt"></i> Contacts</div>
+        <div id="contactsContainer" class="contact-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast-msg"></div>
+
+  <script>
+    (function() {
+      const data = {
+        guest: {
+          map: "https://maps.app.goo.gl/wQHMmago7W1b97RH8?g_st=iw",
+          image: "guest.png",
+          contacts: [
+            { name: "Tharusha", phone: "0760771317" },
+            { name: "Chamika", phone: "0703813879" }
+          ],
+          label: "Guest Parking",
+          sub: "For visiting guests",
+          icon: "fa-user-friends",
+          tier: "guest"
+        },
+        bike: {
+          map: "https://maps.app.goo.gl/HPbKiwXM49Y1RBDN8?g_st=iw",
+          image: "Bike Only.png",
+          contacts: [
+            { name: "Tharusha", phone: "0760771317" },
+            { name: "Chamika", phone: "0703813879" }
+          ],
+          label: "Bike Parking",
+          sub: "Two-wheelers only",
+          icon: "fa-motorcycle",
+          tier: "bike"
+        },
+        1000: {
+          map: "https://maps.app.goo.gl/hQ8pjmNEHssnxKhm8?g_st=iw",
+          image: "D.png",
+          contacts: [
+            { name: "Tharusha", phone: "0760771317" },
+            { name: "Chamika", phone: "0703813879" }
+          ],
+          label: "1000 Parking",
+          sub: "Zone D",
+          icon: "fa-car",
+          tier: "1000"
+        },
+        2000: {
+          map: "https://maps.app.goo.gl/Tv1xQtZxXcCtFUcr6?g_st=iw",
+          image: "C.png",
+          contacts: [
+            { name: "Tharusha", phone: "0760771317" },
+            { name: "Chamika", phone: "0703813879" }
+          ],
+          label: "2000 Parking",
+          sub: "Zone C",
+          icon: "fa-car-side",
+          tier: "2000"
+        },
+        3000: {
+          map: "https://maps.app.goo.gl/xYWcucR5EPxPKf258?g_st=iw",
+          image: "B.png",
+          contacts: [
+            { name: "Tharusha", phone: "0760771317" },
+            { name: "Chamika", phone: "0703813879" }
+          ],
+          label: "3000 Parking",
+          sub: "Zone B",
+          icon: "fa-star",
+          tier: "3000"
+        },
+        5000: {
+          map: "https://maps.app.goo.gl/a9f1cNieoYGUztWk9?g_st=iw",
+          image: "A.png",
+          contacts: [
+            { name: "Tharusha", phone: "0760771317" },
+            { name: "Chamika", phone: "0703813879" }
+          ],
+          label: "5000 Parking",
+          sub: "Zone A · premium",
+          icon: "fa-crown",
+          tier: "5000"
+        }
+      };
+
+      const displayOrder = ['guest', 'bike', '1000', '2000', '3000', '5000'];
+
+      const homeView = document.getElementById('homeView');
+      const detailView = document.getElementById('detailView');
+      const ticketList = document.getElementById('ticketList');
+      const detailTitle = document.getElementById('detailTitle');
+      const detailBadge = document.getElementById('detailBadge');
+      const detailDot = document.getElementById('detailDot');
+      const sketchPlaceholder = document.getElementById('sketchPlaceholder');
+      const mapImage = document.getElementById('mapImage');
+      const contactsContainer = document.getElementById('contactsContainer');
+      const mapBtn = document.getElementById('mapBtn');
+      const backBtn = document.getElementById('backHomeBtn');
+      const toast = document.getElementById('toast');
+
+      let currentKey = null;
+      let toastTimer = null;
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      function tierVar(tier) {
+        return `var(--tier-${tier})`;
+      }
+
+      function buildHome() {
+        ticketList.innerHTML = '';
+        displayOrder.forEach((key, i) => {
+          const ticket = data[key];
+          if (!ticket) return;
+
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.style.setProperty('--tier', tierVar(ticket.tier));
+          card.style.animationDelay = `${0.06 + i * 0.05}s`;
+
+          card.innerHTML = `
+            <button class="card-inner select-btn" data-key="${key}">
+              <span class="tier-icon"><i class="fas ${ticket.icon}"></i></span>
+              <span class="card-text">
+                <h3>${ticket.label}</h3>
+                <span>${ticket.sub}</span>
+              </span>
+              <span class="card-arrow"><i class="fas fa-chevron-right"></i></span>
+            </button>
+          `;
+          ticketList.appendChild(card);
+        });
+
+        document.querySelectorAll('.select-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const key = this.getAttribute('data-key');
+            if (key) showDetail(key);
+          });
+        });
+      }
+
+      function showDetail(key) {
+        currentKey = key;
+        const ticket = data[key];
+        if (!ticket) return;
+
+        const tierColor = tierVar(ticket.tier);
+        detailView.style.setProperty('--tier', tierColor);
+
+        detailTitle.textContent = ticket.label;
+        detailBadge.textContent = ticket.sub;
+
+        // Reset + preload map image with a soft fade-in
+        sketchPlaceholder.classList.add('shimmer');
+        mapImage.classList.remove('loaded');
+        mapImage.style.display = 'block';
+
+        const existingFallback = sketchPlaceholder.querySelector('.placeholder-img');
+        if (existingFallback) existingFallback.remove();
+        if (!sketchPlaceholder.contains(mapImage)) sketchPlaceholder.appendChild(mapImage);
+
+        const finishLoad = () => {
+          sketchPlaceholder.classList.remove('shimmer');
+          mapImage.classList.add('loaded');
+        };
+
+        mapImage.onload = finishLoad;
+        mapImage.onerror = function() {
+          sketchPlaceholder.classList.remove('shimmer');
+          this.style.display = 'none';
+          const fallback = document.createElement('div');
+          fallback.className = 'placeholder-img';
+          fallback.innerHTML = `
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Map location</span>
+            <span style="font-size:0.65rem; opacity:0.5; background:transparent;">${ticket.label}</span>
+          `;
+          sketchPlaceholder.appendChild(fallback);
+        };
+        // Re-trigger load
+        mapImage.src = "image.png";
+        if (mapImage.complete && mapImage.naturalWidth > 0) finishLoad();
+
+        // Contacts
+        contactsContainer.innerHTML = '';
+        ticket.contacts.forEach((c, i) => {
+          const a = document.createElement('a');
+          a.className = 'contact-item';
+          a.style.opacity = '0';
+          a.style.animation = `cardIn 0.4s var(--ease-out) ${0.15 + i * 0.06}s forwards`;
+          a.href = `tel:${c.phone}`;
+          a.innerHTML = `
+            <span class="avatar"><i class="fas fa-user"></i></span>
+            <span class="contact-name">${c.name}</span>
+            <span class="contact-phone"><i class="fas fa-phone" style="font-size:0.75rem; opacity:0.6;"></i> ${c.phone}</span>
+          `;
+          contactsContainer.appendChild(a);
+        });
+
+        mapBtn.onclick = function() {
+          if (currentKey && data[currentKey]) {
+            window.open(data[currentKey].map, '_blank');
+            showToast(`Opening ${data[currentKey].label} in Google Maps`);
+          } else {
+            showToast('Location not available');
+          }
+        };
+
+        homeView.classList.add('hidden');
+        detailView.classList.remove('hidden');
+        detailView.classList.remove('view-enter');
+        void detailView.offsetWidth;
+        detailView.classList.add('view-enter');
+      }
+
+      function goHome() {
+        detailView.classList.add('hidden');
+        homeView.classList.remove('hidden');
+        homeView.classList.remove('view-enter');
+        void homeView.offsetWidth;
+        homeView.classList.add('view-enter');
+        currentKey = null;
+      }
+
+      backBtn.addEventListener('click', goHome);
+      buildHome();
+    })();
+  </script>
+</body>
+</html>
