@@ -52,7 +52,6 @@
       -moz-osx-font-smoothing: grayscale;
       touch-action: pan-y;
     }
-    /* Liquid glass backdrop */
     .app-wrapper {
       max-width: 440px;
       width: 100%;
@@ -67,7 +66,6 @@
       position: relative;
       transform: translateZ(0);
     }
-    /* inner glass refinement */
     .parking-header {
       background: linear-gradient(150deg, rgba(30,43,37,0.85) 0%, rgba(44,62,51,0.80) 60%, rgba(43,94,59,0.75) 100%);
       backdrop-filter: blur(8px);
@@ -165,7 +163,6 @@
       padding: 4px 0;
     }
 
-    /* glass cards with liquid sheen */
     .card {
       --tier: var(--green-600);
       background: rgba(255, 255, 255, 0.55);
@@ -253,7 +250,6 @@
       border-color: transparent;
     }
 
-    /* buttons with glass */
     .btn {
       width: 100%;
       padding: 16px 20px;
@@ -605,13 +601,33 @@
     const mapBtn = document.getElementById('mapBtn');
     const backBtn = document.getElementById('backHomeBtn');
     const toast = document.getElementById('toast');
-    const appWrapper = document.getElementById('appWrapper');
 
     let currentKey = null;
     let toastTimer = null;
     let touchStartX = 0;
     let touchStartY = 0;
     let isSwiping = false;
+
+    // ----- FIX: smooth goHome without glitch / refresh -----
+    function goHome() {
+      if (detailView.classList.contains('hidden')) return;
+      
+      // Remove any pending animation classes to avoid conflict
+      detailView.classList.remove('view-enter');
+      homeView.classList.remove('view-enter');
+      
+      // Switch views instantly (no flash)
+      detailView.classList.add('hidden');
+      homeView.classList.remove('hidden');
+      
+      // Force reflow then apply entrance animation smoothly
+      void homeView.offsetWidth;
+      homeView.classList.add('view-enter');
+      
+      currentKey = null;
+      // Update history without triggering a reload
+      history.replaceState({ page: 'home' }, '');
+    }
 
     function setupSwipeBack() {
       detailView.addEventListener('touchstart', function(e) {
@@ -651,20 +667,14 @@
         if (!detailView.classList.contains('hidden')) {
           goHome();
           e.preventDefault();
+          // Push a new state so we stay in the app
           history.pushState({ page: 'detail' }, '');
+        } else {
+          // If already on home, keep it stable
+          history.replaceState({ page: 'home' }, '');
         }
       });
-      history.replaceState({ page: 'home' }, '');
-    }
-
-    function goHome() {
-      if (detailView.classList.contains('hidden')) return;
-      detailView.classList.add('hidden');
-      homeView.classList.remove('hidden');
-      homeView.classList.remove('view-enter');
-      void homeView.offsetWidth;
-      homeView.classList.add('view-enter');
-      currentKey = null;
+      // Initialize with home state
       history.replaceState({ page: 'home' }, '');
     }
 
@@ -679,6 +689,7 @@
       detailTitle.textContent = ticket.label;
       detailBadge.textContent = ticket.sub;
 
+      // Reset map image with shimmer
       sketchPlaceholder.classList.add('shimmer');
       mapImage.classList.remove('loaded');
       mapImage.style.display = 'block';
@@ -708,6 +719,7 @@
       mapImage.src = "image.png";
       if (mapImage.complete && mapImage.naturalWidth > 0) finishLoad();
 
+      // Contacts
       contactsContainer.innerHTML = '';
       ticket.contacts.forEach((c, i) => {
         const a = document.createElement('a');
@@ -732,12 +744,14 @@
         }
       };
 
+      // Switch to detail with smooth enter
       homeView.classList.add('hidden');
       detailView.classList.remove('hidden');
       detailView.classList.remove('view-enter');
       void detailView.offsetWidth;
       detailView.classList.add('view-enter');
 
+      // Push state for back button
       history.pushState({ page: 'detail' }, '');
     }
 
@@ -780,16 +794,20 @@
       });
     }
 
+    // Initialize
     buildHome();
     setupSwipeBack();
     setupHistoryBack();
     backBtn.addEventListener('click', goHome);
 
+    // Extra safety: prevent any accidental page reload on popstate
     window.addEventListener('popstate', function(e) {
       if (detailView.classList.contains('hidden')) {
         history.replaceState({ page: 'home' }, '');
       }
     });
+
+    // Ensure we start with a clean state
     history.replaceState({ page: 'home' }, '');
   })();
 </script>
