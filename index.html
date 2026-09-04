@@ -7,7 +7,6 @@
   <!-- Google Material Icons & Fonts -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap">
-  <!-- Apple-style system font stack (SF Pro) fallback -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -24,14 +23,12 @@
       --green-500: #3f9146;
       --green-200: #cde8d0;
       --green-100: #eaf5eb;
-      /* tier colors (material inspired) */
       --tier-guest: #5f7a6b;
       --tier-bike: #1f8a70;
       --tier-1000: #a86f3a;
       --tier-2000: #6b7280;
       --tier-3000: #2e7d32;
       --tier-5000: #b8860b;
-      /* apple-like easing */
       --ease-ios: cubic-bezier(0.25, 0.1, 0.25, 1);
       --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -51,6 +48,7 @@
       background-image: radial-gradient(circle at 10% 20%, rgba(46,125,50,0.05) 0%, transparent 50%);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      touch-action: pan-y; /* better for swipe */
     }
     .app-wrapper {
       max-width: 440px;
@@ -62,8 +60,8 @@
       border: 1px solid rgba(255,255,255,0.6);
       backdrop-filter: blur(2px);
       transition: box-shadow 0.4s var(--ease-ios);
+      position: relative;
     }
-    /* header – glassmorphism light */
     .parking-header {
       background: linear-gradient(150deg, var(--green-900) 0%, var(--green-800) 60%, var(--green-700) 100%);
       padding: 36px 24px 28px;
@@ -71,6 +69,7 @@
       text-align: center;
       position: relative;
       overflow: hidden;
+      touch-action: pan-y;
     }
     .parking-header::before {
       content: "";
@@ -125,9 +124,8 @@
     }
     .parking-header p span { font-size: 1.1rem; }
 
-    /* container & views */
-    .container { background: var(--surface-tint); position: relative; }
-    .view { padding: 24px 20px 32px; }
+    .container { background: var(--surface-tint); position: relative; touch-action: pan-y; }
+    .view { padding: 24px 20px 32px; touch-action: pan-y; }
     .view.hidden { display: none; }
     .view-enter {
       animation: viewIn 0.55s var(--ease-ios) both;
@@ -137,7 +135,6 @@
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* ticket list */
     #ticketList { display: flex; flex-direction: column; gap: 14px; }
     .eyebrow {
       font-size: 0.7rem;
@@ -149,7 +146,6 @@
       margin: 0 4px 16px;
     }
 
-    /* cards – material / apple hybrid */
     .card {
       --tier: var(--green-600);
       background: var(--surface);
@@ -162,6 +158,7 @@
       transform: translateY(12px);
       animation: cardIn 0.6s var(--ease-ios) forwards;
       will-change: transform, opacity;
+      touch-action: manipulation;
     }
     @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
     .card:active { transform: scale(0.975); transition-duration: 0.1s; }
@@ -177,6 +174,7 @@
       text-align: left;
       border-radius: 24px;
       transition: background 0.25s var(--ease-smooth);
+      touch-action: manipulation;
     }
     .card-inner:hover { background: var(--green-100); }
     .card-inner:active { background: var(--green-200); }
@@ -228,7 +226,6 @@
       color: white;
     }
 
-    /* buttons – material design */
     .btn {
       width: 100%;
       padding: 16px 20px;
@@ -249,6 +246,7 @@
       transition: transform 0.3s var(--ease-spring), box-shadow 0.4s var(--ease-ios), background 0.3s var(--ease-ios);
       position: relative;
       overflow: hidden;
+      touch-action: manipulation;
     }
     .btn::after {
       content: "";
@@ -270,6 +268,7 @@
       font-size: 0.9rem;
       margin-bottom: 20px;
       transition: all 0.3s var(--ease-ios);
+      touch-action: manipulation;
     }
     .back-btn:hover { background: var(--green-100); border-color: var(--green-200); box-shadow: none; transform: none; }
     .back-btn:active { transform: scale(0.96); }
@@ -281,7 +280,6 @@
     }
     .map-btn:hover { filter: brightness(0.92); box-shadow: 0 12px 32px color-mix(in srgb, var(--tier, var(--green-800)) 45%, transparent); }
 
-    /* detail */
     .detail-eyebrow {
       display: flex;
       align-items: center;
@@ -312,7 +310,6 @@
       margin-bottom: 20px;
     }
 
-    /* map image with smooth load */
     .parking-sketch {
       background: var(--green-100);
       border-radius: 44px;
@@ -325,6 +322,7 @@
       align-items: center;
       justify-content: center;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), var(--shadow-1);
+      touch-action: pan-y;
     }
     .parking-sketch img {
       width: 100%;
@@ -360,7 +358,6 @@
     }
     .placeholder-img span { background: rgba(255,255,255,0.5); padding: 6px 20px; border-radius: 40px; backdrop-filter: blur(2px); }
 
-    /* contacts */
     .divider { height: 1px; background: linear-gradient(to right, transparent, var(--line), transparent); margin: 20px 0 16px; }
     .section-label {
       font-size: 0.8rem;
@@ -386,6 +383,7 @@
       font-weight: 500;
       transition: transform 0.3s var(--ease-spring), border-color 0.3s, background 0.3s;
       will-change: transform;
+      touch-action: manipulation;
     }
     .contact-item .avatar {
       width: 38px;
@@ -403,7 +401,6 @@
     .contact-item .contact-name { flex: 1; font-size: 0.92rem; }
     .contact-item .contact-phone { font-weight: 400; opacity: 0.5; font-size: 0.85rem; }
 
-    /* toast */
     .toast-msg {
       position: fixed;
       bottom: 32px;
@@ -431,12 +428,11 @@
       .parking-header { padding: 28px 16px 20px; }
       .detail-title { font-size: 1.5rem; }
     }
-    /* material symbol fallback */
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0; }
   </style>
 </head>
 <body>
-<div class="app-wrapper">
+<div class="app-wrapper" id="appWrapper">
   <header class="parking-header">
     <div class="logo-container">
       <img src="logo.png" alt="Sathsara Anurawa Logo" class="logo-image">
@@ -567,55 +563,89 @@
     const mapBtn = document.getElementById('mapBtn');
     const backBtn = document.getElementById('backHomeBtn');
     const toast = document.getElementById('toast');
+    const appWrapper = document.getElementById('appWrapper');
 
     let currentKey = null;
     let toastTimer = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
 
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    // ----- Swipe to go back (from detail to home) -----
+    function setupSwipeBack() {
+      const detailViewEl = detailView;
+      detailViewEl.addEventListener('touchstart', function(e) {
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        isSwiping = false;
+      }, { passive: true });
+
+      detailViewEl.addEventListener('touchmove', function(e) {
+        if (!touchStartX) return;
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        // only if horizontal swipe and not too vertical
+        if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+          isSwiping = true;
+          e.preventDefault(); // prevent pull-to-refresh
+        }
+      }, { passive: false });
+
+      detailViewEl.addEventListener('touchend', function(e) {
+        if (!touchStartX) return;
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        if (isSwiping && deltaX > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+          // swipe right -> go back
+          goHome();
+        }
+        touchStartX = 0;
+        touchStartY = 0;
+        isSwiping = false;
+      }, { passive: true });
     }
 
-    function tierVar(tier) { return `var(--tier-${tier})`; }
-
-    function buildHome() {
-      ticketList.innerHTML = '';
-      displayOrder.forEach((key, i) => {
-        const ticket = data[key];
-        if (!ticket) return;
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.setProperty('--tier', tierVar(ticket.tier));
-        card.style.animationDelay = `${0.05 + i * 0.06}s`;
-        card.innerHTML = `
-          <button class="card-inner select-btn" data-key="${key}">
-            <span class="tier-icon"><span class="material-symbols-outlined">${ticket.icon}</span></span>
-            <span class="card-text">
-              <h3>${ticket.label}</h3>
-              <span>${ticket.sub}</span>
-            </span>
-            <span class="card-arrow"><span class="material-symbols-outlined">chevron_right</span></span>
-          </button>
-        `;
-        ticketList.appendChild(card);
+    // ----- history API for back button (Android / iOS) -----
+    function setupHistoryBack() {
+      // push a dummy state when detail opens
+      window.addEventListener('popstate', function(e) {
+        // if detail is visible, go home
+        if (!detailView.classList.contains('hidden')) {
+          goHome();
+          // prevent default back navigation
+          e.preventDefault();
+          // re-push state so we stay in app
+          history.pushState({ page: 'detail' }, '');
+        }
       });
 
-      document.querySelectorAll('.select-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const key = this.getAttribute('data-key');
-          if (key) showDetail(key);
-        });
-      });
+      // initial state
+      history.replaceState({ page: 'home' }, '');
     }
 
+    // ----- shared goHome -----
+    function goHome() {
+      if (detailView.classList.contains('hidden')) return;
+      detailView.classList.add('hidden');
+      homeView.classList.remove('hidden');
+      homeView.classList.remove('view-enter');
+      void homeView.offsetWidth;
+      homeView.classList.add('view-enter');
+      currentKey = null;
+      // update history state
+      history.replaceState({ page: 'home' }, '');
+    }
+
+    // ----- showDetail -----
     function showDetail(key) {
       currentKey = key;
       const ticket = data[key];
       if (!ticket) return;
 
-      const tierColor = tierVar(ticket.tier);
+      const tierColor = `var(--tier-${ticket.tier})`;
       detailView.style.setProperty('--tier', tierColor);
 
       detailTitle.textContent = ticket.label;
@@ -647,11 +677,9 @@
         `;
         sketchPlaceholder.appendChild(fallback);
       };
-      // trigger load
       mapImage.src = "image.png";
       if (mapImage.complete && mapImage.naturalWidth > 0) finishLoad();
 
-      // Contacts
       contactsContainer.innerHTML = '';
       ticket.contacts.forEach((c, i) => {
         const a = document.createElement('a');
@@ -681,19 +709,70 @@
       detailView.classList.remove('view-enter');
       void detailView.offsetWidth;
       detailView.classList.add('view-enter');
+
+      // push state for back button
+      history.pushState({ page: 'detail' }, '');
     }
 
-    function goHome() {
-      detailView.classList.add('hidden');
-      homeView.classList.remove('hidden');
-      homeView.classList.remove('view-enter');
-      void homeView.offsetWidth;
-      homeView.classList.add('view-enter');
-      currentKey = null;
+    // ----- toast -----
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    backBtn.addEventListener('click', goHome);
+    function tierVar(tier) { return `var(--tier-${tier})`; }
+
+    // ----- build home -----
+    function buildHome() {
+      ticketList.innerHTML = '';
+      displayOrder.forEach((key, i) => {
+        const ticket = data[key];
+        if (!ticket) return;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.setProperty('--tier', tierVar(ticket.tier));
+        card.style.animationDelay = `${0.05 + i * 0.06}s`;
+        card.innerHTML = `
+          <button class="card-inner select-btn" data-key="${key}">
+            <span class="tier-icon"><span class="material-symbols-outlined">${ticket.icon}</span></span>
+            <span class="card-text">
+              <h3>${ticket.label}</h3>
+              <span>${ticket.sub}</span>
+            </span>
+            <span class="card-arrow"><span class="material-symbols-outlined">chevron_right</span></span>
+          </button>
+        `;
+        ticketList.appendChild(card);
+      });
+
+      document.querySelectorAll('.select-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const key = this.getAttribute('data-key');
+          if (key) showDetail(key);
+        });
+      });
+    }
+
+    // ----- init -----
     buildHome();
+    setupSwipeBack();
+    setupHistoryBack();
+
+    // back button handler
+    backBtn.addEventListener('click', goHome);
+
+    // prevent accidental back when home is shown
+    window.addEventListener('popstate', function(e) {
+      if (detailView.classList.contains('hidden')) {
+        // already home, keep it
+        history.replaceState({ page: 'home' }, '');
+      }
+    });
+
+    // ensure initial state
+    history.replaceState({ page: 'home' }, '');
   })();
 </script>
 </body>
